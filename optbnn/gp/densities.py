@@ -78,7 +78,7 @@ def multivariate_normal(x, mu, L):
     d = x - mu
     if d.dim() == 1:
         d = d.unsqueeze(1)
-    alpha, _ = torch.solve(d, L)
+    alpha, _ = torch.linalg.solve(d, L)
     alpha = alpha.squeeze(1)
     num_col = 1 if x.dim() == 1 else x.size(1)
     num_dims = x.size(0)
