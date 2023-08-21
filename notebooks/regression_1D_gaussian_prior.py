@@ -36,6 +36,7 @@ util.ensure_dir(OUT_DIR)
 util.ensure_dir(FIG_DIR)
 
 
+
 # Utilities
 
 def make_random_gap(X, gap_ratio=0.2):
