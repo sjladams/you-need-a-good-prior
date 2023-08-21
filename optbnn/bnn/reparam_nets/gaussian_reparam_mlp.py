@@ -17,7 +17,7 @@ def init_norm_layer(input_dim, norm_layer):
 
 class GaussianMLPReparameterization(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dims, activation_fn,
-                 W_std=None, b_std=None, scaled_variance=True, norm_layer=None):
+                 W_std=None, b_std=None, scaled_variance=True, norm_layer=None, prior_per='layer'):
         """Initialization.
 
         Args:
@@ -54,7 +54,7 @@ class GaussianMLPReparameterization(nn.Module):
 
         # Initialize layers
         self.layers = nn.ModuleList([GaussianLinearReparameterization(
-            input_dim, hidden_dims[0], W_std, b_std,
+            input_dim, hidden_dims[0], W_std, b_std, prior_per=prior_per,
             scaled_variance=scaled_variance)])
 
         self.norm_layers = nn.ModuleList([init_norm_layer(
@@ -63,14 +63,14 @@ class GaussianMLPReparameterization(nn.Module):
         for i in range(1, len(hidden_dims)):
             self.layers.add_module(
                 "linear_{}".format(i), GaussianLinearReparameterization(
-                    hidden_dims[i-1], hidden_dims[i], W_std, b_std,
+                    hidden_dims[i-1], hidden_dims[i], W_std, b_std, prior_per=prior_per,
                     scaled_variance=scaled_variance))
             self.norm_layers.add_module(
                 "norm_{}".format(i), init_norm_layer(hidden_dims[i],
                                                      self.norm_layer))
 
         self.output_layer = GaussianLinearReparameterization(
-            hidden_dims[-1], output_dim, W_std, b_std,
+            hidden_dims[-1], output_dim, W_std, b_std, prior_per=prior_per,
             scaled_variance=scaled_variance)
 
     def forward(self, X):
@@ -91,7 +91,6 @@ class GaussianMLPReparameterization(nn.Module):
             X = self.activation_fn(norm_layer(linear_layer(X)))
 
         X = self.output_layer(X)
-
         return X
 
     def sample_functions(self, X, n_samples):
