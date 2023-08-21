@@ -1,41 +1,15 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
-get_ipython().run_line_magic('matplotlib', 'inline')
-
-
-# In[2]:
-
-
 import torch
 import numpy as np
 import math
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 import matplotlib as mpl
-
 import os
-import sys
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
 
-# In[3]:
-
-
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
-
-
-# In[4]:
-
-
 os.chdir("..")
-
-
-# In[5]:
 
 
 from optbnn.gp.models.gpr import GPR
@@ -52,31 +26,17 @@ from optbnn.utils import util
 from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 
 
-# In[6]:
-
-
 mpl.rcParams['figure.dpi'] = 100
-
-
-# In[7]:
-
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
-# In[8]:
-
-
-OUT_DIR = "./exp/1D_synthetic/tanh_gaussian_new"
+OUT_DIR = "./exp/1D_synthetic/relu_gaussian_new"
 FIG_DIR = os.path.join(OUT_DIR, "figures")
 util.ensure_dir(OUT_DIR)
 util.ensure_dir(FIG_DIR)
 
 
-# # Utilities
-
-# In[9]:
-
+# Utilities
 
 def make_random_gap(X, gap_ratio=0.2):
     a,b = X.min(),X.max()
@@ -88,12 +48,14 @@ def make_random_gap(X, gap_ratio=0.2):
     else:
         X[idx] = gap_b + np.random.rand(idx.sum()) * (b-gap_b)
 
+
 def gp_sample(X, ampl=1, leng=1, sn2=0.1):
     n, x = X.shape[0], X / leng
     sum_xx = np.sum(x*x, 1).reshape(-1, 1).repeat(n, 1)
     D = sum_xx + sum_xx.transpose() - 2 * np.matmul(x, x.transpose())
     C = ampl**2 * np.exp(-0.5 * D) + np.eye(n) * sn2
     return np.random.multivariate_normal(np.zeros(n), C).reshape(-1, 1)
+
 
 def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=False, ax=None):
     if ax is None: 
@@ -121,11 +83,7 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
     ax.plot(X, mu, color='xkcd:red')
 
 
-# # Generate data
-
-# In[13]:
-
-
+# Generate data
 util.set_seed(1)
 
 N = 64
@@ -144,26 +102,15 @@ y_, y_mean, y_std = zscore_normalization(y)
 Xtest_, _, _ = zscore_normalization(Xtest, X_mean, X_std)
 
 
-# In[14]:
-
-
 fig = plt.figure()
 plt.plot(X, y, "ko", ms=5)
 plt.title("Dataset")
 plt.show()
 
-
-# In[15]:
-
-
 Xtest_tensor = torch.from_numpy(Xtest_).to(device)
 
 
-# # Initialize Priors
-
-# In[16]:
-
-
+# Initialize Priors
 util.set_seed(1)
 
 # GP hyper-parameters
@@ -183,16 +130,12 @@ gpmodel = GPR(X=torch.from_numpy(X_).to(device),
 gpmodel.likelihood.variance.set(sn2)
 gpmodel = gpmodel.to(device)
 
-
-# In[17]:
-
-
 util.set_seed(1)
 
 # Initialize BNN Priors
-width = 50              # Number of units in each hidden layer
-depth = 3               # Number of hidden layers
-transfer_fn = "tanh"    # Activation function
+width = 64              # Number of units in each hidden layer
+depth = 1               # Number of hidden layers
+transfer_fn = "relu"    # Activation function
 
 # Initialize Gaussian prior.
 # Fixed Prior
@@ -201,73 +144,53 @@ std_bnn = GaussianMLPReparameterization(input_dim=1, output_dim=1, activation_fn
 
 # Prior to be optimized 
 opt_bnn = GaussianMLPReparameterization(input_dim=1, output_dim=1, activation_fn=transfer_fn, 
-    hidden_dims=[width]*depth)
+    hidden_dims=[width]*depth, prior_per='parameter')
 
 std_bnn = std_bnn.to(device)
 opt_bnn = opt_bnn.to(device)
 
 
+
 # # Optimize Prior
-
-# In[18]:
-
-
-# We use a grid of 200 data points in [-6, 6] for the measurement set
-util.set_seed(1)
-data_generator = GridGenerator(-6, 6)
-
-
-# In[19]:
-
-
-mapper_num_iters = 800 # Define the number of iterations of Wasserstein optimization
-
-
-# In[ ]:
-
-
-# Initiialize the Wasserstein optimizer
-util.set_seed(1)
-mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
-                           out_dir=OUT_DIR, 
-                           wasserstein_steps=(0, 1000),
-                           wasserstein_lr=0.08,
-                           n_data=200, n_gpu=1, gpu_gp=True)
-
-# Start optimizing the prior
-w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01, 
-                         save_ckpt_every=50, print_every=20, debug=True)
-path = os.path.join(OUT_DIR, "wsr_values.log")
-np.savetxt(path, w_hist, fmt='%.6e')        
-
-
-# In[ ]:
-
-
-# Visualize progression of the prior optimization
-wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
-wdist_vals = np.loadtxt(wdist_file)
-
-fig = plt.figure(figsize=(6, 3.5))
-indices = np.arange(mapper_num_iters)[::5]
-plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
-plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
-plt.xlabel("Iteration")
-plt.show()
+#
+# # We use a grid of 200 data points in [-6, 6] for the measurement set
+# util.set_seed(1)
+# data_generator = GridGenerator(-6, 6)
+#
+mapper_num_iters = 0 # 800 # Define the number of iterations of Wasserstein optimization
+#
+# # Initiialize the Wasserstein optimizer
+# util.set_seed(1)
+# mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
+#                            out_dir=OUT_DIR,
+#                            wasserstein_steps=(0, 1000),
+#                            wasserstein_lr=0.08,
+#                            n_data=200, n_gpu=1, gpu_gp=True)
+#
+# # Start optimizing the prior
+# w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01,
+#                          save_ckpt_every=50, print_every=20, debug=True)
+# path = os.path.join(OUT_DIR, "wsr_values.log")
+# np.savetxt(path, w_hist, fmt='%.6e')
+#
+# # Visualize progression of the prior optimization
+# wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
+# wdist_vals = np.loadtxt(wdist_file)
+#
+# fig = plt.figure(figsize=(6, 3.5))
+# indices = np.arange(mapper_num_iters)[::5]
+# plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
+# plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
+# plt.xlabel("Iteration")
+# plt.show()
 
 
 # # Visualize Prior
-
-# In[ ]:
-
 
 # Load the optimize prior
 util.set_seed(1)
 ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
 opt_bnn.load_state_dict(torch.load(ckpt_path))
-
-
-# In[ ]:
 
 
 # Draw functions from the priors
@@ -322,10 +245,6 @@ gp_preds = zscore_unnormalization(gp_preds, y_mean, y_std)
 
 
 # ## BNN with Fixed Prior
-# 
-
-# In[ ]:
-
 
 # SGHMC Hyper-parameters
 sampling_configs = {
@@ -339,10 +258,6 @@ sampling_configs = {
     "mdecay": 0.01,             # Momentum coefficient
     "print_every_n_samples": 5
 }
-
-
-# In[ ]:
-
 
 # Initialize the prior
 util.set_seed(1)
