@@ -116,7 +116,7 @@ class GPModel(torch.nn.Module):
             jitter = torch.eye(mu.size(0), dtype=mu.dtype, device=mu.device) * self.jitter_level
             samples = []
             for i in range(self.num_latent):
-                L = torch.cholesky(var + jitter, upper=False)
+                L = torch.linalg.cholesky(var + jitter)
                 V = torch.randn(L.size(0), num_samples, dtype=L.dtype, device=L.device)
                 samples.append(mu + torch.matmul(L, V))
             return torch.stack(samples, dim=0).permute(1, 2, 0)
