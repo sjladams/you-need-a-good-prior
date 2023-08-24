@@ -92,7 +92,7 @@ class GPR(GPModel):
         """
         Kx = self.kern.K(self.X, Xnew)
         K = self.kern.K(self.X) + torch.eye(self.X.size(0), dtype=self.X.dtype, device=self.X.device) * self.likelihood.variance.get()
-        L = torch.cholesky(K, upper=False)
+        L = torch.linalg.cholesky(K)
 
         A = torch.linalg.solve(L, Kx)  # could use triangular solve, note gesv has B first, then A in AX=B
         V = torch.linalg.solve(L, self.Y - self.mean_function(self.X)) # could use triangular solve
