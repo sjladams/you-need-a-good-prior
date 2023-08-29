@@ -152,7 +152,7 @@ class GPModel(torch.nn.Module):
         jitter = torch.eye(mu.size(0), dtype=mu.dtype, device=mu.device) * self.jitter_level
         samples = []
         for i in range(self.num_latent): # TV-Todo: batch??
-            L = torch.cholesky(var[:, :, i] + jitter, upper=False)
+            L = torch.linalg.cholesky(var[:, :, i] + jitter)
             V = torch.randn(L.size(0), num_samples, dtype=L.dtype, device=L.device)
             samples.append(mu[:, i:i + 1] + torch.matmul(L, V))
         return torch.stack(samples, dim=0) # TV-Todo: transpose?
