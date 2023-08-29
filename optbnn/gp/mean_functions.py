@@ -14,8 +14,10 @@
 # limitations under the License.
 
 import torch
+import math
 from . import parameter
 
+CONS_2PI = 2 * math.pi
 
 class MeanFunction(torch.nn.Module):
     """
@@ -65,3 +67,18 @@ class Linear(MeanFunction):
 
     def __call__(self, X):
         return torch.matmul(X, self.A.get()) + self.b.get()
+
+
+class Sine(MeanFunction):
+    """
+    y_i = sin(x_i)
+    """
+    def __init__(self, amp: float = 1., freq: float = 1., phase: float = 0.):
+        MeanFunction.__init__(self)
+
+        self.amp = parameter.Param(amp)
+        self.freq = parameter.Param(freq)
+        self.phase = parameter.Param(phase)
+
+    def __call__(self, X):
+        return self.amp.get() * torch.sin(CONS_2PI * self.freq.get() * X + self.phase.get())
