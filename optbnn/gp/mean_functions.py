@@ -34,10 +34,10 @@ class MeanFunction(torch.nn.Module):
         raise NotImplementedError("Implement the forward method for this mean function")
 
     def __add__(self, other):
-        return MeanAdditive(self, other)
+        return Additive(self, other)
 
     def __mul__(self, other):
-        return MeanProduct(self, other)
+        return Product(self, other)
 
 
 class Zero(MeanFunction):
@@ -82,3 +82,24 @@ class Sine(MeanFunction):
 
     def __call__(self, X):
         return self.amp.get() * torch.sin(CONS_2PI * self.freq.get() * X + self.phase.get())
+
+
+class Additive(MeanFunction):
+    def __init__(self, first_part, second_part) -> None:
+        MeanFunction.__init__(self)
+        self.add_1 = first_part
+        self.add_2 = second_part
+
+    def __call__(self, X):
+        return torch.add(self.add_1(X), self.add_2(X))
+
+
+class Product(MeanFunction):
+    def __init__(self, first_part, second_part):
+        MeanFunction.__init__(self)
+
+        self.prod_1 = first_part
+        self.prod_2 = second_part
+
+    def __call__(self, X):
+        return torch.multiply(self.prod_1(X), self.prod_2(X))
