@@ -107,8 +107,7 @@ class GPModel(torch.nn.Module):
         mu = self.mean_function(X)
 
         prior_params = []
-        for name in dict(self.kern.named_parameters()).keys():
-            param = getattr(self.kern, name)
+        for name, param in dict(self.kern.named_parameters()).items():
             if param.prior is not None:
                 prior_params.append(param)
         if len(prior_params) == 0:
