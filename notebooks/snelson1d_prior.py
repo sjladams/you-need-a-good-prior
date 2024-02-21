@@ -29,6 +29,10 @@ from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 mpl.rcParams['figure.dpi'] = 100
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+if device.type == 'cuda':
+    show_plots = False
+else:
+    show_plots = True
 
 OUT_DIR = "./exp/1D_snelson"
 FIG_DIR = os.path.join(OUT_DIR, "figures")
@@ -84,10 +88,11 @@ y = data['train']['y']
 x_plot = data['plot']['x']
 y_plot = data['plot']['y']
 
-fig = plt.figure()
-plt.plot(x, y, "ko", ms=5)
-plt.title("Dataset")
-plt.show()
+if show_plots:
+    fig = plt.figure()
+    plt.plot(x, y, "ko", ms=5)
+    plt.title("Dataset")
+    plt.show()
 
 # Initialize Priors
 util.set_seed(1)
@@ -161,12 +166,13 @@ np.savetxt(path, w_hist, fmt='%.6e')
 wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
 wdist_vals = np.loadtxt(wdist_file)
 
-fig = plt.figure(figsize=(6, 3.5))
-indices = np.arange(mapper_num_iters)[::5]
-plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
-plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
-plt.xlabel("Iteration")
-plt.show()
+if show_plots:
+    fig = plt.figure(figsize=(6, 3.5))
+    indices = np.arange(mapper_num_iters)[::5]
+    plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
+    plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
+    plt.xlabel("Iteration")
+    plt.show()
 
 
 # # Visualize Prior
@@ -192,9 +198,9 @@ for idx in range(1, depth):
     to_save[idx] = get_info_layer(f"layers.linear_{idx}")
 to_save[depth] = get_info_layer(last_layer_tag)
 
-tag = f"{OUT_DIR}/[{depth}x{width}]_{transfer_fn}_con={connectivity_params}"
+tag = f"{OUT_DIR}/[{depth}x{width}]_{transfer_fn}_con={connectivity_params}_iters={mapper_num_iters}"
 torch.save(to_save, tag)
-#
+
 # Draw functions from the priors
 n_plot = 4000
 util.set_seed(8)
@@ -211,22 +217,22 @@ opt_bnn_samples = opt_bnn.sample_functions(
     x_plot.to(device), n_plot).detach().cpu().numpy().squeeze()
 # opt_bnn_samples = zscore_unnormalization(opt_bnn_samples, y_mean, y_std)
 
+if show_plots:
+    fig, axs = plt.subplots(1, 3, figsize=(14, 3))
+    plot_samples(x_plot, gp_samples, ax=axs[0], n_keep=15)
+    axs[0].set_title('GP Prior')
+    # axs[0].set_ylim([-5, 5])
 
-fig, axs = plt.subplots(1, 3, figsize=(14, 3))
-plot_samples(x_plot, gp_samples, ax=axs[0], n_keep=15)
-axs[0].set_title('GP Prior')
-# axs[0].set_ylim([-5, 5])
+    plot_samples(x_plot, std_bnn_samples, ax=axs[1], color='xkcd:grass', n_keep=15)
+    axs[1].set_title('BNN Prior (Fixed)')
+    # axs[1].set_ylim([-5, 5])
 
-plot_samples(x_plot, std_bnn_samples, ax=axs[1], color='xkcd:grass', n_keep=15)
-axs[1].set_title('BNN Prior (Fixed)')
-# axs[1].set_ylim([-5, 5])
+    plot_samples(x_plot, opt_bnn_samples, ax=axs[2], color='xkcd:yellowish orange', n_keep=15)
+    axs[2].set_title('BNN Prior (GP-induced)')
+    axs[2].set_ylim([-5, 5])
 
-plot_samples(x_plot, opt_bnn_samples, ax=axs[2], color='xkcd:yellowish orange', n_keep=15)
-axs[2].set_title('BNN Prior (GP-induced)')
-axs[2].set_ylim([-5, 5])
-
-plt.tight_layout()
-plt.show()
+    plt.tight_layout()
+    plt.show()
 
 #
 # # # Posterior Inference
