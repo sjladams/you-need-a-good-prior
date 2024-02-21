@@ -200,15 +200,15 @@ n_plot = 4000
 util.set_seed(8)
 
 gp_samples = gpmodel.sample_functions(
-   x_plot, n_plot).detach().cpu().numpy().squeeze()
+   x_plot.to(device), n_plot).detach().cpu().numpy().squeeze()
 # gp_samples = zscore_unnormalization(gp_samples, y_mean, y_std)
 
 std_bnn_samples = std_bnn.sample_functions(
-    x_plot, n_plot).detach().cpu().numpy().squeeze()
+    x_plot.to(device), n_plot).detach().cpu().numpy().squeeze()
 # std_bnn_samples = zscore_unnormalization(std_bnn_samples, y_mean, y_std)
 
 opt_bnn_samples = opt_bnn.sample_functions(
-    x_plot, n_plot).detach().cpu().numpy().squeeze()
+    x_plot.to(device), n_plot).detach().cpu().numpy().squeeze()
 # opt_bnn_samples = zscore_unnormalization(opt_bnn_samples, y_mean, y_std)
 
 
