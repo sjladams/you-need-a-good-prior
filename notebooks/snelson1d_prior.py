@@ -141,7 +141,7 @@ opt_bnn = opt_bnn.to(device)
 util.set_seed(1)
 data_generator = GridGenerator(x_plot.min(), x_plot.max())
 
-mapper_num_iters = 2 # 800 # Define the number of iterations of Wasserstein optimization
+mapper_num_iters = 800 # 800 # Define the number of iterations of Wasserstein optimization
 
 # Initiialize the Wasserstein optimizer
 util.set_seed(1)
