@@ -135,65 +135,65 @@ opt_bnn = GaussianMLPReparameterization(input_dim=1, output_dim=1, activation_fn
 std_bnn = std_bnn.to(device)
 opt_bnn = opt_bnn.to(device)
 
-# # # Optimize Prior
-# #
-# # # We use a grid of 200 data points in [-6, 6] for the measurement set
-# util.set_seed(1)
-# data_generator = GridGenerator(x_plot.min(), x_plot.max())
+# # Optimize Prior
 #
-# mapper_num_iters = 2 # 800 # Define the number of iterations of Wasserstein optimization
-#
-# # Initiialize the Wasserstein optimizer
-# util.set_seed(1)
-# mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
-#                            out_dir=OUT_DIR,
-#                            wasserstein_steps=(0, 1000),
-#                            wasserstein_lr=0.08,
-#                            n_data=200, n_gpu=1, gpu_gp=True)
-#
-# # Start optimizing the prior
-# w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01,
-#                          save_ckpt_every=50, print_every=20, debug=True)
-# path = os.path.join(OUT_DIR, "wsr_values.log")
-# np.savetxt(path, w_hist, fmt='%.6e')
-#
-# # Visualize progression of the prior optimization
-# wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
-# wdist_vals = np.loadtxt(wdist_file)
-#
-# fig = plt.figure(figsize=(6, 3.5))
-# indices = np.arange(mapper_num_iters)[::5]
-# plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
-# plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
-# plt.xlabel("Iteration")
-# plt.show()
+# # We use a grid of 200 data points in [-6, 6] for the measurement set
+util.set_seed(1)
+data_generator = GridGenerator(x_plot.min(), x_plot.max())
+
+mapper_num_iters = 2 # 800 # Define the number of iterations of Wasserstein optimization
+
+# Initiialize the Wasserstein optimizer
+util.set_seed(1)
+mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
+                           out_dir=OUT_DIR,
+                           wasserstein_steps=(0, 1000),
+                           wasserstein_lr=0.08,
+                           n_data=200, n_gpu=1, gpu_gp=True)
+
+# Start optimizing the prior
+w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01,
+                         save_ckpt_every=50, print_every=20, debug=True)
+path = os.path.join(OUT_DIR, "wsr_values.log")
+np.savetxt(path, w_hist, fmt='%.6e')
+
+# Visualize progression of the prior optimization
+wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
+wdist_vals = np.loadtxt(wdist_file)
+
+fig = plt.figure(figsize=(6, 3.5))
+indices = np.arange(mapper_num_iters)[::5]
+plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
+plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
+plt.xlabel("Iteration")
+plt.show()
 
 
-# # # Visualize Prior
-# # Load the optimize prior
-# util.set_seed(1)
-# ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
-# opt_bnn.load_state_dict(torch.load(ckpt_path))
-#
-# ## save prior in readable format
-# import os
-#
-# state_dict = torch.load(ckpt_path)
-# to_save = dict()
-# first_layer_tag = 'layers.0'
-# last_layer_tag = 'output_layer'
-# param_tags = ['W_std', 'b_std']
-#
-# def get_info_layer(layer_tag):
-#     return {tag: state_dict[f"{layer_tag}.{tag}"] for tag in param_tags}
-#
-# to_save[0] = get_info_layer(first_layer_tag)
-# for idx in range(1, depth):
-#     to_save[idx] = get_info_layer(f"layers.linear_{idx}")
-# to_save[depth] = get_info_layer(last_layer_tag)
-#
-# tag = f"{OUT_DIR}/[{depth}x{width}]_{transfer_fn}_con={connectivity_params}"
-# torch.save(to_save, tag)
+# # Visualize Prior
+# Load the optimize prior
+util.set_seed(1)
+ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
+opt_bnn.load_state_dict(torch.load(ckpt_path))
+
+## save prior in readable format
+import os
+
+state_dict = torch.load(ckpt_path)
+to_save = dict()
+first_layer_tag = 'layers.0'
+last_layer_tag = 'output_layer'
+param_tags = ['W_std', 'b_std']
+
+def get_info_layer(layer_tag):
+    return {tag: state_dict[f"{layer_tag}.{tag}"] for tag in param_tags}
+
+to_save[0] = get_info_layer(first_layer_tag)
+for idx in range(1, depth):
+    to_save[idx] = get_info_layer(f"layers.linear_{idx}")
+to_save[depth] = get_info_layer(last_layer_tag)
+
+tag = f"{OUT_DIR}/[{depth}x{width}]_{transfer_fn}_con={connectivity_params}"
+torch.save(to_save, tag)
 #
 # Draw functions from the priors
 n_plot = 4000
