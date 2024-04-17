@@ -30,7 +30,8 @@ mpl.rcParams['figure.dpi'] = 100
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-OUT_DIR = f"{os.getcwd()}/exp/1D_synthetic/tanh_gaussian_new"
+os_sep = os.sep
+OUT_DIR = f"{os.getcwd()}{os_sep}exp{os_sep}1D_synthetic{os_sep}relu_gaussian_new"
 FIG_DIR = os.path.join(OUT_DIR, "figures")
 util.ensure_dir(OUT_DIR)
 util.ensure_dir(FIG_DIR)
@@ -108,6 +109,8 @@ if __name__ == "__main__":
         plt.plot(X, y, "ko", ms=5)
         plt.title("Dataset")
         plt.show()
+    else:
+        plt.savefig(os.path.join(FIG_DIR, "loss.pdf"))
 
     Xtest_tensor = torch.from_numpy(Xtest_).to(device)
 
