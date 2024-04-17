@@ -83,7 +83,7 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
 
 
 if __name__ == "__main__":
-    DEBUG = True
+    DEBUG = False
     # Generate data
     util.set_seed(1)
 
