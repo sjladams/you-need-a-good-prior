@@ -35,7 +35,7 @@ OUT_DIR = f"{os.getcwd()}{os_sep}exp{os_sep}1D_synthetic{os_sep}relu_gaussian_ne
 FIG_DIR = os.path.join(OUT_DIR, "figures")
 util.ensure_dir(OUT_DIR)
 util.ensure_dir(FIG_DIR)
-
+print(f"save figures in {FIG_DIR}")
 
 # Utilities
 
