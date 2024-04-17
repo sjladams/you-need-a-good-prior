@@ -24,12 +24,13 @@ from optbnn.metrics.sampling import compute_rhat_regression
 from optbnn.utils import util
 from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 
+import os
 
 mpl.rcParams['figure.dpi'] = 100
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-OUT_DIR = "./exp/1D_synthetic/tanh_gaussian_new"
+OUT_DIR = f"{os.getcwd()}/exp/1D_synthetic/tanh_gaussian_new"
 FIG_DIR = os.path.join(OUT_DIR, "figures")
 util.ensure_dir(OUT_DIR)
 util.ensure_dir(FIG_DIR)
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     # Initialize BNN Priors
     width = 50              # Number of units in each hidden layer
     depth = 3               # Number of hidden layers
-    transfer_fn = "tanh"    # Activation function
+    transfer_fn = "relu"    # Activation function
     connectivity_params = 3
     if connectivity_params == 0:
         prior_per = 'parameter'
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     if DEBUG:
         plt.show()
     else:
-        plt.savefig(os.path.join(OUT_DIR, "loss.pdf"))
+        plt.savefig(os.path.join(FIG_DIR, "loss.pdf"))
 
 
     # # Visualize Prior
@@ -239,7 +240,7 @@ if __name__ == "__main__":
     if DEBUG:
         plt.show()
     else:
-        plt.savefig(os.path.join(OUT_DIR, "prior.pdf"))
+        plt.savefig(os.path.join(FIG_DIR, "prior.pdf"))
 
     # Posterior Inference
     # GP
@@ -350,5 +351,5 @@ if __name__ == "__main__":
     if DEBUG:
         plt.show()
     else:
-        plt.savefig(os.path.join(OUT_DIR, "posterior.pdf"))
+        plt.savefig(os.path.join(FIG_DIR, "posterior.pdf"))
 
