@@ -104,13 +104,13 @@ if __name__ == "__main__":
     y_, y_mean, y_std = zscore_normalization(y)
     Xtest_, _, _ = zscore_normalization(Xtest, X_mean, X_std)
 
+    fig = plt.figure()
+    plt.plot(X, y, "ko", ms=5)
+    plt.title("Dataset")
     if DEBUG:
-        fig = plt.figure()
-        plt.plot(X, y, "ko", ms=5)
-        plt.title("Dataset")
         plt.show()
     else:
-        plt.savefig(os.path.join(FIG_DIR, "loss.pdf"))
+        plt.savefig(os.path.join(FIG_DIR, "data.pdf"))
 
     Xtest_tensor = torch.from_numpy(Xtest_).to(device)
 
@@ -164,46 +164,48 @@ if __name__ == "__main__":
     # Optimize Prior
     # We use a grid of 200 data points in [-6, 6] for the measurement set
     util.set_seed(1)
-    data_generator = GridGenerator(-6, 6)
 
     if DEBUG:
         mapper_num_iters = 2
     else:
         mapper_num_iters = 800
 
-    # Initialize the Wasserstein optimizer
-    util.set_seed(1)
-    mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
-                               out_dir=OUT_DIR,
-                               wasserstein_steps=(0, 1000),
-                               wasserstein_lr=0.08,
-                               n_data=200, n_gpu=1, gpu_gp=True)
-
-    # Start optimizing the prior
-    w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01,
-                             save_ckpt_every=50, print_every=20, debug=True)
-    path = os.path.join(OUT_DIR, "wsr_values.log")
-    np.savetxt(path, w_hist, fmt='%.6e')
-
-    # Visualize progression of the prior optimization
-    wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
-    wdist_vals = np.loadtxt(wdist_file)
-
-    fig = plt.figure(figsize=(6, 3.5))
-    indices = np.arange(mapper_num_iters)[::5]
-    plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
-    plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
-    plt.xlabel("Iteration")
-    if DEBUG:
-        plt.show()
-    else:
-        plt.savefig(os.path.join(FIG_DIR, "loss.pdf"))
-
-
-    # # Visualize Prior
-    # Load the optimize prior
-    util.set_seed(1)
     ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
+    if not os.path.exists(ckpt_path):
+        data_generator = GridGenerator(-6, 6)
+
+
+        # Initialize the Wasserstein optimizer
+        util.set_seed(1)
+        mapper = MapperWasserstein(gpmodel, opt_bnn, data_generator,
+                                   out_dir=OUT_DIR,
+                                   wasserstein_steps=(0, 1000),
+                                   wasserstein_lr=0.08,
+                                   n_data=200, n_gpu=1, gpu_gp=True)
+
+        # Start optimizing the prior
+        w_hist = mapper.optimize(num_iters=mapper_num_iters, n_samples=512, lr=0.01,
+                                 save_ckpt_every=50, print_every=20, debug=True)
+        path = os.path.join(OUT_DIR, "wsr_values.log")
+        np.savetxt(path, w_hist, fmt='%.6e')
+
+        # Visualize progression of the prior optimization
+        wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
+        wdist_vals = np.loadtxt(wdist_file)
+
+        fig = plt.figure(figsize=(6, 3.5))
+        indices = np.arange(mapper_num_iters)[::5]
+        plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
+        plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
+        plt.xlabel("Iteration")
+        if DEBUG:
+            plt.show()
+        else:
+            plt.savefig(os.path.join(FIG_DIR, "loss.pdf"))
+
+    # Visualize Prior
+    # Load the optimize prior
+
     opt_bnn.load_state_dict(torch.load(ckpt_path))
 
     # Draw functions from the priors
