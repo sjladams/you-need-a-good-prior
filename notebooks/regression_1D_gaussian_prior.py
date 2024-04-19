@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # Initialize BNN Priors
     width = 50              # Number of units in each hidden layer
     depth = 3               # Number of hidden layers
-    transfer_fn = "relu"    # Activation function
+    transfer_fn = "tanh"    # Activation function
     connectivity_params = 3
     if connectivity_params == 0:
         prior_per = 'parameter'
@@ -151,11 +151,11 @@ if __name__ == "__main__":
     # Initialize Gaussian prior.
     # Fixed Prior
     std_bnn = GaussianMLPReparameterization(input_dim=1, output_dim=1, activation_fn=transfer_fn,
-        hidden_dims=[width]*depth, scaled_variance=False)
+        hidden_dims=[width]*depth, scaled_variance=True)
 
     # Prior to be optimized
     opt_bnn = GaussianMLPReparameterization(input_dim=1, output_dim=1, activation_fn=transfer_fn,
-        hidden_dims=[width]*depth, prior_per=prior_per, scaled_variance=False)
+        hidden_dims=[width]*depth, prior_per=prior_per, scaled_variance=True)
 
     std_bnn = std_bnn.to(device)
     opt_bnn = opt_bnn.to(device)
@@ -173,7 +173,6 @@ if __name__ == "__main__":
     ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
     if not os.path.exists(ckpt_path):
         data_generator = GridGenerator(-6, 6)
-
 
         # Initialize the Wasserstein optimizer
         util.set_seed(1)
