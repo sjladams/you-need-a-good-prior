@@ -58,7 +58,7 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
 
 if __name__ == '__main__':
     util.set_seed(1)
-    DEBUG = True
+    DEBUG = False
 
     # setup
     # data
@@ -182,7 +182,6 @@ if __name__ == '__main__':
     std_bnn_samples = std_bnn.sample_functions(
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
-    print(f'device Xtest_tensor: {Xtest_tensor.device}')
     opt_bnn_samples = opt_bnn.sample_functions(
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
