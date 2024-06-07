@@ -11,7 +11,7 @@ import platform
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
-print(os.getcwd())
+print(os.path.abspath(__file__))
 
 os.chdir("..")
 
