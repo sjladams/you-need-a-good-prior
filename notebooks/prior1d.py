@@ -6,6 +6,7 @@ import matplotlib as mpl
 
 import os
 import sys
+import platform
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -29,7 +30,7 @@ mpl.rcParams['figure.dpi'] = 100
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-OUT_DIR = f"{os.getcwd()}{os.sep}exp{os.sep}prior1d"
+OUT_DIR = f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}exp{os.sep}prior1d"
 util.ensure_dir(OUT_DIR)
 
 
@@ -152,12 +153,13 @@ if __name__ == '__main__':
         wdist_file = os.path.join(OUT_DIR, "wsr_values.log")
         wdist_vals = np.loadtxt(wdist_file)
 
-        fig = plt.figure(figsize=(6, 3.5))
-        indices = np.arange(mapper_num_iters)[::5]
-        plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
-        plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
-        plt.xlabel("Iteration")
-        plt.show()
+        if platform.system() == "Windows" and DEBUG:
+            fig = plt.figure(figsize=(6, 3.5))
+            indices = np.arange(mapper_num_iters)[::5]
+            plt.plot(indices, wdist_vals[indices], "-ko", ms=4)
+            plt.ylabel(r"$W_1(p_{gp}, p_{nn})$")
+            plt.xlabel("Iteration")
+            plt.show()
 
         ckpt_path = os.path.join(OUT_DIR, "ckpts", "it-{}.ckpt".format(mapper_num_iters))
         torch.save(torch.load(ckpt_path), os.path.join(OUT_DIR, f"{tag}.ckpt"))
@@ -179,7 +181,6 @@ if __name__ == '__main__':
     opt_bnn_samples = opt_bnn.sample_functions(
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
-
     fig, axs = plt.subplots(1, 3, figsize=(14, 3))
     plot_samples(Xtest_, gp_samples, ax=axs[0], n_keep=5)
     axs[0].set_title('GP Prior')
@@ -193,9 +194,8 @@ if __name__ == '__main__':
     axs[2].set_title('BNN Prior (GP-induced)')
     axs[2].set_ylim([-5, 5])
 
-    # \todo set axis equal
-
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DIR, f"{tag}.pdf"))
-    plt.show()
+    if platform.system() == "Windows" and DEBUG:
+        plt.show()
 
