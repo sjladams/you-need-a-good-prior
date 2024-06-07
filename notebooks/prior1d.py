@@ -28,11 +28,11 @@ from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 
 mpl.rcParams['figure.dpi'] = 100
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda')
 
 file_path = os.path.abspath(__file__)
 OUT_DIR = f"{os.path.dirname(os.path.dirname(file_path))}{os.sep}exp{os.sep}prior1d"
-print(OUT_DIR)
 util.ensure_dir(OUT_DIR)
 
 
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         n_samples = 512
 
     params_mapper = {'wasserstein_steps': (0, 1000), 'wasserstein_lr': 0.08, 'n_data': n_meas_set, 'n_gpu': 1,
-                     'gpu_gp': True}
+                     'gpu_gp': False}
     params_opt = {'num_iters': mapper_num_iters, 'n_samples': n_samples, 'lr': 0.01, 'save_ckpt_every': 50,
                   'print_every': 20, 'debug': True}
 
