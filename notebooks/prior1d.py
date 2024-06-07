@@ -1,3 +1,7 @@
+import os
+print(os.getcwd())
+
+
 import torch
 import numpy as np
 import math
