@@ -30,6 +30,8 @@ mpl.rcParams['figure.dpi'] = 100
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+print(__file__)
+print(os.path.abspath(__file__))
 OUT_DIR = f"{os.path.dirname(os.path.abspath(__file__))}{os.sep}exp{os.sep}prior1d"
 util.ensure_dir(OUT_DIR)
 
@@ -55,7 +57,7 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
 
 if __name__ == '__main__':
     util.set_seed(1)
-    DEBUG = False
+    DEBUG = True
 
     # setup
     # data
