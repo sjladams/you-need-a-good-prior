@@ -11,7 +11,8 @@ import platform
 import warnings
 warnings.simplefilter("ignore", UserWarning)
 
-print(os.path.abspath(__file__))
+OUT_DIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}{os.sep}exp{os.sep}prior1d"
+print(OUT_DIR)
 
 os.chdir("..")
 
@@ -33,9 +34,7 @@ mpl.rcParams['figure.dpi'] = 100
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
 
-# file_path = os.path.abspath(__file__)
-# print(file_path)
-# OUT_DIR = f"{os.path.dirname(os.path.dirname(file_path))}{os.sep}exp{os.sep}prior1d"
+util.ensure_dir(OUT_DIR)
 
 
 def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=False, ax=None):
@@ -58,10 +57,6 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
 
 
 if __name__ == '__main__':
-    OUT_DIR = f"{os.getcwd()}{os.sep}exp{os.sep}prior1d"
-    util.ensure_dir(OUT_DIR)
-    print(OUT_DIR)
-
     util.set_seed(1)
     DEBUG = True
 
