@@ -34,7 +34,7 @@ device = torch.device('cpu')
 file_path = os.path.abspath(__file__)
 OUT_DIR = f"{os.path.dirname(os.path.dirname(file_path))}{os.sep}exp{os.sep}prior1d"
 util.ensure_dir(OUT_DIR)
-
+print(OUT_DIR)
 
 def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=False, ax=None):
     if ax is None:
