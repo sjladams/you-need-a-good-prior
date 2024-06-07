@@ -88,7 +88,7 @@ if __name__ == '__main__':
                   'print_every': 20, 'debug': True}
 
     # save tag
-    tag = f'cmf_[{depth}x{width}]_{transfer_fn}_con={con}_iters={mapper_num_iters}'
+    tag = f'cmf_[{depth}x{width}]_{transfer_fn}_con={con}_iters={mapper_num_iters}_rbf_ls={leng}'
 
     # Generate data
     X = np.random.rand(N, 1) * (b-a) + a
