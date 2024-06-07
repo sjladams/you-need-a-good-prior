@@ -170,6 +170,7 @@ if __name__ == '__main__':
     # Visualize Prior
     # Load the optimize prior
     opt_bnn.load_state_dict(torch.load(os.path.join(OUT_DIR, f"{tag}.ckpt")))
+    opt_bnn = opt_bnn.to(device)
 
     # Draw functions from the priors
     n_plot = 4000
@@ -181,6 +182,7 @@ if __name__ == '__main__':
     std_bnn_samples = std_bnn.sample_functions(
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
+    print(f'device Xtest_tensor: {Xtest_tensor.device}')
     opt_bnn_samples = opt_bnn.sample_functions(
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
