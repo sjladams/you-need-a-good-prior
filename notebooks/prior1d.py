@@ -1,7 +1,3 @@
-import os
-print(os.getcwd())
-
-
 import torch
 import numpy as np
 import math
@@ -14,6 +10,8 @@ import platform
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
+
+print(os.getcwd())
 
 os.chdir("..")
 
