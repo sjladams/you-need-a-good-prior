@@ -31,9 +31,8 @@ mpl.rcParams['figure.dpi'] = 100
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 file_path = os.path.abspath(__file__)
-print(file_path)
-print(os.path.dirname(file_path))
-OUT_DIR = f"{os.getcwd()}{os.sep}exp{os.sep}prior1d"
+OUT_DIR = f"{os.path.dirname(os.path.dirname(file_path))}{os.sep}exp{os.sep}prior1d"
+print(OUT_DIR)
 util.ensure_dir(OUT_DIR)
 
 
