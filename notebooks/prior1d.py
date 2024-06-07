@@ -29,7 +29,7 @@ from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 mpl.rcParams['figure.dpi'] = 100
 
 # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cuda')
+device = torch.device('cpu')
 
 file_path = os.path.abspath(__file__)
 OUT_DIR = f"{os.path.dirname(os.path.dirname(file_path))}{os.sep}exp{os.sep}prior1d"
