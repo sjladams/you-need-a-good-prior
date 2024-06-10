@@ -75,7 +75,7 @@ if __name__ == '__main__':
     width = 64              # Number of units in each hidden layer
     depth = 2               # Number of hidden layers
     transfer_fn = "tanh"    # Activation function
-    con = 0
+    con = 3
 
     # optimization
     n_meas_set = 200  # number of points in measurement set
