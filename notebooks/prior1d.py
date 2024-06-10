@@ -68,11 +68,11 @@ if __name__ == '__main__':
 
     # gp
     sn2 = 0.1  # noise variance
-    leng = 1.0  # lengthscale
+    leng = 0.75  # lengthscale
     ampl = 1.0  # amplitude
 
     # bnn
-    width = 128              # Number of units in each hidden layer
+    width = 64              # Number of units in each hidden layer
     depth = 2               # Number of hidden layers
     transfer_fn = "tanh"    # Activation function
     con = 0
@@ -186,15 +186,15 @@ if __name__ == '__main__':
         Xtest_tensor.float(), n_plot).detach().cpu().numpy().squeeze()
 
     fig, axs = plt.subplots(1, 3, figsize=(14, 3))
-    plot_samples(Xtest_, gp_samples, ax=axs[0], n_keep=5)
+    plot_samples(Xtest_, gp_samples, ax=axs[0], n_keep=15)
     axs[0].set_title('GP Prior')
     axs[0].set_ylim([-5, 5])
 
-    plot_samples(Xtest_, std_bnn_samples, ax=axs[1], color='xkcd:grass', n_keep=5)
+    plot_samples(Xtest_, std_bnn_samples, ax=axs[1], color='xkcd:grass', n_keep=15)
     axs[1].set_title('BNN Prior (Fixed)')
     axs[1].set_ylim([-5, 5])
 
-    plot_samples(Xtest_, opt_bnn_samples, ax=axs[2], color='xkcd:yellowish orange', n_keep=5)
+    plot_samples(Xtest_, opt_bnn_samples, ax=axs[2], color='xkcd:yellowish orange', n_keep=15)
     axs[2].set_title('BNN Prior (GP-induced)')
     axs[2].set_ylim([-5, 5])
 
