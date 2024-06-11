@@ -14,20 +14,16 @@ warnings.simplefilter("ignore", UserWarning)
 OUT_DIR = f"{os.path.dirname(os.path.dirname(os.path.abspath(__file__)))}{os.sep}exp{os.sep}prior1d"
 print(OUT_DIR)
 
+
 os.chdir("..")
 
 from optbnn.gp.models.gpr import GPR
 from optbnn.gp import kernels, mean_functions
 from optbnn.bnn.reparam_nets import GaussianMLPReparameterization
-from optbnn.bnn.nets.mlp import MLP
-from optbnn.bnn.likelihoods import LikGaussian
-from optbnn.bnn.priors import FixedGaussianPrior, OptimGaussianPrior
 from optbnn.prior_mappers.wasserstein_mapper import MapperWasserstein, WassersteinDistance
 from optbnn.utils.rand_generators import MeasureSetGenerator, GridGenerator
 from optbnn.utils.normalization import normalize_data, zscore_normalization, zscore_unnormalization
-from optbnn.metrics.sampling import compute_rhat_regression
 from optbnn.utils import util
-from optbnn.sgmcmc_bayes_net.regression_net import RegressionNet
 
 mpl.rcParams['figure.dpi'] = 100
 
@@ -86,7 +82,7 @@ if __name__ == '__main__':
         mapper_num_iters = 800
         n_samples = 512
 
-    params_mapper = {'wasserstein_steps': (0, 1000), 'wasserstein_lr': 0.08, 'n_data': n_meas_set, 'n_gpu': 1,
+    params_mapper = {'wasserstein_steps': (0, 1000), 'wasserstein_lr': 0.08, 'n_data': n_meas_set, 'n_gpu': 0,
                      'gpu_gp': False}
     params_opt = {'num_iters': mapper_num_iters, 'n_samples': n_samples, 'lr': 0.01, 'save_ckpt_every': 50,
                   'print_every': 20, 'debug': True}
@@ -169,7 +165,12 @@ if __name__ == '__main__':
 
     # Visualize Prior
     # Load the optimize prior
-    opt_bnn.load_state_dict(torch.load(os.path.join(OUT_DIR, f"{tag}.ckpt")))
+    if platform.system() == "Windows":
+        map_location = torch.device('cpu')
+    else:
+        map_location = None
+
+    opt_bnn.load_state_dict(torch.load(os.path.join(OUT_DIR, f"{tag}.ckpt"), map_location=map_location))
     opt_bnn = opt_bnn.to(device)
 
     # Draw functions from the priors
