@@ -64,7 +64,8 @@ def runner(dataset_name, debug, out_dir, basis_dir):
     width = 64              # Number of units in each hidden layer
     depth = 2               # Number of hidden layers
     transfer_fn = "tanh"    # Activation function
-    con = 0
+    con = 3
+    nr_seeds = 1
 
     # Optimization
     n_meas_set = 100  # number of points in measurement set
@@ -83,7 +84,7 @@ def runner(dataset_name, debug, out_dir, basis_dir):
 
     # 1. Optimized Gaussian Prior
 
-    for random_seed in range(10):
+    for random_seed in range(nr_seeds):
         # save tag
         tag = f'cmf_[{depth}x{width}]_{transfer_fn}_con={con}_iters={mapper_num_iters}_rbf_ls=' \
               f'{GP_SETTING[dataset_name]["default_lengthscale"]}_seed={random_seed}'
@@ -153,7 +154,7 @@ def runner(dataset_name, debug, out_dir, basis_dir):
     # Visualize the convergence
     if platform.system() == "Windows" and debug:
         wdist_data = []
-        for i in range(0, 10):
+        for i in range(0, nr_seeds):
             wdist_file = os.path.join(save_dir, "wsr_values.log")
             wdist_data.append(np.loadtxt(wdist_file))
 
