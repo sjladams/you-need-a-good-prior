@@ -3,6 +3,7 @@ import numpy as np
 import math
 import matplotlib.pylab as plt
 import matplotlib as mpl
+from matplotlib.ticker import MaxNLocator
 
 import os
 import sys
@@ -32,6 +33,29 @@ device = torch.device('cpu')
 
 util.ensure_dir(OUT_DIR)
 
+def set_format_ax(ax, x_lim: list = None, y_lim: list = None, x_label: str = None, y_label: str = None,
+                  title: str = None, restrict_ticks_to_ints: bool = False, tight_x_lim: bool = False,
+                  tight_y_lim: bool = False):
+    if x_lim is not None:
+        ax.set_xlim(*x_lim)
+    if y_lim is not None:
+        ax.set_ylim(*y_lim)
+
+    if x_label is not None:
+        ax.set_xlabel(x_label)
+    if y_label is not None:
+        ax.set_ylabel(y_label)
+    if title is not None:
+        ax.set_title(title)
+
+    if restrict_ticks_to_ints:
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    if tight_x_lim:
+        ax.autoscale(enable=True, axis='x', tight=True)
+    if tight_y_lim:
+        ax.autoscale(enable=True, axis='y', tight=True)
 
 def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=False, ax=None):
     if ax is None:
@@ -64,7 +88,7 @@ if __name__ == '__main__':
 
     # gp
     sn2 = 0.1  # noise variance
-    leng = 0.75  # lengthscale
+    leng = 0.5  # lengthscale
     ampl = 1.0  # amplitude
 
     # bnn
@@ -201,6 +225,35 @@ if __name__ == '__main__':
 
     plt.tight_layout()
     plt.savefig(os.path.join(OUT_DIR, f"{tag}.pdf"))
+    if platform.system() == "Windows" and DEBUG:
+        plt.show()
+
+
+
+    fig_snn, ax_snn = plt.subplots(1, 1, figsize=tuple([4, 2]))
+
+    color = "xkcd:bluish"
+
+    mu = opt_bnn_samples.mean(1)
+    std = opt_bnn_samples.std(1)
+    ub = mu + 3 * std
+    lb = mu - 3 * std
+    n_keep = 15
+
+    ax_snn.fill_between(Xtest_.flatten(), ub.flatten(), lb.flatten(), color=color, alpha=0.25, lw=0)
+    if n_keep > 0:
+        ax_snn.plot(np.tile(Xtest_, (1, n_keep)), opt_bnn_samples[:, :n_keep], color=color, alpha=0.8)
+    ax_snn.plot(Xtest_.flatten(), mu, color='xkcd:red')
+
+
+    y_lim = [-5.1, 5.1]
+
+    set_format_ax(ax_snn, y_lim=y_lim, x_label='$x$', y_label='$f^w(x)$', tight_x_lim=True, restrict_ticks_to_ints=True)
+
+    margins = {'left': 0.13, 'right': 0.98, 'top': 0.95, 'bottom': 0.2}
+    fig_snn.subplots_adjust(**margins)
+
+    plt.savefig(os.path.join(OUT_DIR, f"{tag}_SA_FORMAT.pdf"))
     if platform.system() == "Windows" and DEBUG:
         plt.show()
 
