@@ -8,6 +8,7 @@ from matplotlib.ticker import MaxNLocator
 import os
 import sys
 import platform
+from argparse import ArgumentParser
 
 import warnings
 warnings.simplefilter("ignore", UserWarning)
@@ -76,7 +77,17 @@ def plot_samples(X, samples, var=None, n_keep=12, color="xkcd:bluish", smooth_q=
     ax.plot(X, mu, color='xkcd:red')
 
 
+def parse_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--con', type=int, default=0, choices=[0, 1, 2, 3], help='connectivity parameter')
+    parser.add_argument('--width', type=int, default=64, choices=[64, 128], help='width network')
+    parser.add_argument('--depth', type=int, default=2, choices=[1, 2], help='depth network')
+    parser.add_argument('--ls', type=float, default=1.0, choices=[0.5, 0.75, 1.0], help='length scale gp')
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
+    args = parse_arguments()
     util.set_seed(1)
     DEBUG = False
 
@@ -88,14 +99,14 @@ if __name__ == '__main__':
 
     # gp
     sn2 = 0.1  # noise variance
-    leng = 0.5  # lengthscale
+    leng = args.ls  # 0.5  # lengthscale
     ampl = 1.0  # amplitude
 
     # bnn
-    width = 64              # Number of units in each hidden layer
-    depth = 2               # Number of hidden layers
+    width = args.width  # 64              # Number of units in each hidden layer
+    depth = args.depth  # 2               # Number of hidden layers
     transfer_fn = "tanh"    # Activation function
-    con = 0
+    con = args.con  # 0
 
     # optimization
     n_meas_set = 200  # number of points in measurement set
